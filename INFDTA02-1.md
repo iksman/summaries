@@ -129,10 +129,12 @@ sim = 1 / (1 + d)
 ![Imgur](https://i.imgur.com/uGowukV.png)
 
 Calculating pearson coefficient between Clara and Robert
-| User  |Item 1   |Item 2   |Item 3   |Item 4   |Item 5   |
-|:------|:--:|:--:|:--:|:--:|:--:|
-|Clara  |4.75|4.5 |5   |4.25|4   |
-|Robert |4   |3   |5   |2   |1   |
+
+| User  | Item 1  | Item 2  | Item 3  | Item 4  | Item 5  |
+|:------|:-------:|:-------:|:-------:|:-------:|:-------:|
+|Clara|4.75|4.5|5|4.25|4|
+|Robert|4|3|5|2|1|
+
 ```
 r = r1 - r2 / (sqrt(r3x - r4x) * sqrt(r3y - r4y))
 
@@ -185,10 +187,11 @@ cos(x,y) = sum(forEach item (xN * yN)) / sqrt(sum(x^2)) * sqrt(sum(y^2))
 ```
 
 ###     Example 1
-| User  |Item 1   |Item 2   |Item 3   |Item 4   |Item 5   |
-|:------|:--:|:--:|:--:|:--:|:--:|
-|Clara  |4.75|4.5 |5   |4.25|4   |
-|Robert |4   |3   |5   |2   |1   |
+
+| User  | Item 1 | Item 2 | Item 3 | Item 4 | Item 5 |
+|:------|:------:|:------:|:------:|:------:|:------:|
+|Clara|4.75|4.5 |5|4.25|4 |
+|Robert|4|3|5|2|1 |
 
 Compute the cosine similarity between Clara and Robert
 ```
@@ -211,6 +214,7 @@ cos(x,y) = 0.935
 
 ###     Back to Problem 1 
 Using this knowledge, we can prove that Amy is less similar than Bill to X.
+
 | User | Item 1     | Item 2        | Item 3 |
 |:-----|:----------:|:-------------:|:------:|
 | Amy  | 3.0        | -             | -      |
@@ -246,10 +250,11 @@ cos(Bill, X) = 0.98
 ##      RECAP Exercise
 
 Calculate the similarity between Bill and Jim using all four measures learned during this lecture.
+
 | User | A  |  B |  C |  D |  E |
 |:-----|:--:|:--:|:--:|:--:|:--:|
-| Bill | 5 | - | 1 | 3 | 5 |
-| Jim  | 2 | 5 | 4 | 3 | - |
+| Bill | 5  | -  | 1  | 3  | 5  |
+| Jim  | 2  | 5  | 4  | 3  | -  |
 
 Euclidian
 ```
