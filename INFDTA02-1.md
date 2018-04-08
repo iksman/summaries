@@ -246,8 +246,8 @@ cos(Bill, X) = 0.98
 ##      RECAP Exercise
 
 Calculate the similarity between Bill and Jim using all four measures learned during this lecture.
-| User | A | B | C | D | E |
-|:-----|:-:|:-:|:-:|:-:|:-:|
+| User | A  |  B |  C |  D |  E |
+|:-----|:--:|:--:|:--:|:--:|:--:|
 | Bill | 5 | - | 1 | 3 | 5 |
 | Jim  | 2 | 5 | 4 | 3 | - |
 
@@ -480,7 +480,7 @@ rPred = 4.275
 Compute the predicted rating for Jim for item C, considering his 3 nearest neighbours using Euclidean similarity with a minimum threshold of 0,35.
 
 | User | Item A | Item B | Item C | Item D |
-|:-|:-:|:-:|:-:|:-:|:-:|
+|:-----|:------:|:------:|:------:|:------:|
 |Tom|1.5|4.5|3|-|
 |Bill|5|-|1|1|
 |Amy|1|4|5|5|
