@@ -1,5 +1,4 @@
-#       INFDTA02-1
-#       Data Science 1
+#       INFDTA02-1 Data Science 1
 
 #       Lecture 1
 
@@ -462,3 +461,250 @@ rPred = (0.5 * 4.5 + 0.7 * 5 + 0.8 * 3.5) / 0.5 + 0.7 + 0.8
 rPred = 8.55 / 2.0
 rPred = 4.275
 ```
+
+##      Recap
+-   Recommender systems
+    -   Collaborative filtering => focus on users and ratings
+    -   Content-based filtering => focus on item feature
+
+-   Collaborative filtering
+    -   User-item
+        -   Compute similarity between users
+        -   Find nearest neighbour of target user
+        -   User their ratings of new items to predict ratings for the target user
+    -   Item-item
+        -   Lecture 3
+
+###     Exercise
+
+Compute the predicted rating for Jim for item C, considering his 3 nearest neighbours using Euclidean similarity with a minimum threshold of 0,35.
+
+| User | Item A | Item B | Item C | Item D |
+|:-|:-:|:-:|:-:|:-:|:-:|
+|Tom|1.5|4.5|3|-|
+|Bill|5|-|1|1|
+|Amy|1|4|5|5|
+|Jim|2|5|**?**|4|
+|Sara|3|4|4|-|
+
+|User| Euclidian distance to Jim |
+|:--|:--|
+|Tom| ? |
+|Bill|sqrt(18) |
+|Amy|sqrt(3) |
+|Sara| ? |
+
+Euclidian similarities
+```
+d(Tom,Jim) = (1.5 - 2)^2 + (4.5 - 5)^2
+d(Tom,Jim) = 0.5
+s(Tom,Jim) = 1 / 1 + 0.5
+s(Tom,Jim) = 0.67
+
+s(Bill,Jim) = 1 / 1 + sqrt(18)
+s(Bill,Jim) = 0.19
+
+s(Amy,Jim) = 1 / 1 + sqrt(3)
+s(Amy,Jim) = 0.37
+
+d(Sara,Jim) = (3 - 2)^2 + (4 - 5)^2
+d(Sara,Jim) = 2
+s(Sara,Jim) = 1 / 1 + 2
+s(Sara,Jim) = 0.33
+```
+The nearest neighbours to Jim are Tom and Amy, the others did not meet the threshold.
+
+#      Lecture 3
+-   User-item
+    -   Main problems
+        -   Scalability
+        -   Sparsity
+
+-   Item-item
+    -   Idea is to combine item similarity and user ratings to create recommendations
+    -   Item based reasoning
+        -   If item A is very similar to item B
+        -   ... and if a user likes item A very much...
+        -   ... then they will probably like item B as well!
+    -   Similarity between items can be pre-computed
+        -   Only the combination with the users' ratings is in "real time"
+
+##      Item-item Slope One
+
+-   Steps
+    1.  Compute `deviations` between pairs of items (ahead of time)
+    2.  Combine ratings and deviations to make predictions (runtime)
+
+###     Intuitive Example
+How much will Ben like Whitney Houston?
+| | PSY | Whitney Houston|
+|:--|:-:|:-:|
+|Amy|3|4|
+|Ben|4|?|
+
+Calculate predicted rating
+```
+deviation(WH,PSY) = 4 - 3 = +1
+//  Note the + in + 1 as this is a deviation of the PSY rating compared to WH rating
+
+Ben's rating of WH = 4 + 1 = 5
+```
+
+###     Part 1
+1.  Compute deviations between all pairs of items
+
+> Deviation = `average difference` in ratings between the two items (considering only the users who rated both items)
+
+![Imgur](https://i.imgur.com/8Z3DGyZ.png)
+
+-   S<sub>i,j</sub> = set of users who rated _both_ items `i` and `j`
+-   u<sub>i</sub> = rating of user `u` for item `i` (same for u<sub>j</sub>)
+-   card(SS<sub>i,j</sub>) = number of users who rated both items
+
+Pseudocode for the formula
+```
+deviation(i, j) =>
+   currdev = 0
+   foreach user u who rated both items i and j
+      currdev += (rating of user u to item i) - (rating of user u to item j)
+   currdev/(how many users rated both i and j)
+```
+
+####    Example 1
+|User|Taylor Swift|PSY|Whitney Houston|
+|:--|:-:|:-:|:-:|
+|Amy|4|3|4
+|Ben|5|2|?
+|Clara|?|3.5|4
+|Daisy|5|?|3
+
+Deviation between Taylor Swift and PSY?
+```
+dev(TS,PSY) = (4-3) + (5-2) / 2
+dev(TS,PSY) = 1 + 3 / 2
+dev(TS,PSY) = 2
+```
+
+Deviation between PSY and Whitney Houston?
+```
+dev(PSY,WH) = (3-4) + (3.5-4) / 2
+dev(PSY,WH) = -1 + -0.5 / 2
+dev(PSY,WH) = -0.75
+```
+
+Deviation between Whitney Houston and Taylor Swift?
+```
+dev(WH,TS) = (4-4) - (3-5) / 2
+dev(WH,TS) = -2 / 2
+dev(WH,TS) = -1
+```
+
+Deviation matrix
+| |Taylor Swift|PSY|Whitney Houston|
+|:-|:-:|:-:|:-:|
+|Taylor Swift|0|2|1|
+|PSY|-2|0|-0.75|
+|Whitney Houston|-1|0.75|0|
+
+If a user inserts a new rating in the system, we do not need to update the deviations.
+
+For each pair(x,y) we store
+-   Deviation `d`
+-   The number of people who rated both items `n`
+
+Updating the deviation requires one quick computation!
+
+**Updating deviations example**
+-   `n = 9` users rated both `A` and `B`
+-   current deviation between `A` and `B` is dev<sub>A,B</sub> = 2
+-   a user rates item `A` with r<sub>A</sub> = 5 and item `B` with r<sub>B</sub> = 1
+
+To update the deviation between A and B
+```
+dev'(A,B) = (dev(A,B) * n) + (rA - rB) / n + 1
+          = (2 * 9) + (5 - 1) / 10
+          = 22 / 10
+          = 2.2
+```
+
+###     Part 2
+2.  Making predictions combining deviations and ratings
+
+![Imgur](https://i.imgur.com/wAY0FKh.png)
+
+-   p(u,i) = predicted rating for user `u` and item `i`
+-   j are the items already rated by user `u` (uj is the rating)
+-   dev(i,j) = deviation between items `i` and `j`
+-   card(S(i,j)) = number of users who both rated `i` and `j`
+
+Psuedocode
+```js
+predictedRating = (u, i) =>
+   numerator = 0 //teller
+   denominator = 0 //noemer
+   foreach (item j that user u already rated)
+      extract info about the deviation between i and j (dev and howManyUsers)
+      numerator += (rating of u for j + dev between i and j) * (howManyUsers)
+      denominator += howManyUsers
+   numerator/denominator
+```
+
+####    Example 1
+Ben's ratings
+| | Taylor Swift | PSY | Whitney Houston|
+|:--|:-:|:-:|:-:|
+|Ben|5|2|?|
+
+| |Taylor Swift|PSY|Whitney Houston|
+|:-|:-:|:-:|:-:|
+|Taylor Swift|0|2|1|
+|PSY|-2|0|-0.75|
+|Whitney Houston|-1|0.75|0|
+
+What is the predicted rating of Whitney Houston for Ben?
+```
+p(Ben, WH) = (5-1) * 2 + (2+0.75) * 2 / 2 + 2
+           = 8 + 5.5 / 4
+           = 3.375
+```
+
+###     Example exercise
+|Customer|A|B|C|
+|:--|:-:|:-:|:-:|
+|John|5|3|2|
+|Amy|4|2|3|
+|Mark|3|4|?|
+|Lucy|?|2|5|
+
+Deviations
+```
+dev(A,B) = (5-3)+(4-2)+(3-4) / 3 = 1
+dev(B,C) = (3-2)+(2-3)+(2-5) / 3 = -1
+dev(A,C) = (5-2)+(4-3) / 2 = 2
+```
+
+Deviation matrix
+| | A | B | C |
+|:--|:-:|:-:|:-:|
+| A | 0 | 1 <sub>(3)</sub> | 2 <sub>(2)</sub> |
+| B | -1 <sub>(3)</sub> | 0 | -1 <sub>(3)</sub> |
+| C | -2 <sub>(2)</sub> | 1 <sub>(3)</sub> | 0 |
+
+```
+p(Lucy,A) = ?
+p(Lucy,A) = (2 + 1) * 3 + (5 + 2) * 2 / 3 + 2
+p(Lucy,A) = 23 / 5
+p(Lucy,A) = 4.6
+
+p(Mark,C) = ?
+p(Mark,C) = (3 - 2) * 2 + (4 + 1) * 3 / 2 + 3
+p(Mark,C) = 2 + 15 / 5
+p(Mark,C) = 3.4
+```
+
+|Customer|A|B|C|
+|:--|:-:|:-:|:-:|
+|John|5|3|2|
+|Amy|4|2|3|
+|Mark|3|4|**3.4**|
+|Lucy|**4.6**|2|5|
