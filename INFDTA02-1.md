@@ -442,4 +442,23 @@ sum of all weighted ratings = 0.75 + 0.8 + 0.675 = 2.2
 The predicted rating is 2.2
 ```
 
+##      Weighted average
+Another way of computing the predicted rating of item `i` is doing the **weighted average** of all neighbours ratings
 
+![Imgur](https://i.imgur.com/GFdFuq0.png)
+-   `n` 	number of neighbours considered
+-   `Ru`    rating of the item `i` given by user `u`
+-   `Su`    similarity of such user with the target (weight)
+
+###     Example
+| User | Spiderman 2 | Pearson Coefficient |
+|:-----|:-----------:|:-------------------:|
+| Bill | 4.5 | 0.5 |
+| Robert | 5 | 0.7 |
+| Clara | 3.5 | 0.8 |
+
+```
+rPred = (0.5 * 4.5 + 0.7 * 5 + 0.8 * 3.5) / 0.5 + 0.7 + 0.8
+rPred = 8.55 / 2.0
+rPred = 4.275
+```
