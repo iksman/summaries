@@ -235,15 +235,15 @@ cos(Bill, X) = 0.98
 
 ##      Which problem applies to what formula?
 
->   Pearson Coefficient
--   Grade inflation
+-   Pearson Coefficient
+    -   Grade inflation
     -   Different users => different scale
 
->   Cosine Similarity
--   Data is sparse
+-   Cosine Similarity
+    -   Data is sparse
 
->   Manhattan, Euclidean
--   Data is dense
+-   Manhattan, Euclidean
+    -   Data is dense
     -   Almost all attriutes have non-zero values
     -   Magnitude of the values is important
 
@@ -331,7 +331,7 @@ cos(x,y) = 0,4
 
 ##      User-item: nearest neighbours
 -   Do we use the *single* most similar person to a user?
-    - >No! Any quirk would be used in creating recommendations
+    > No! Any quirk would be used in creating recommendations
     - More data = more accuracy
 
 -   Solution?
@@ -713,3 +713,220 @@ p(Mark,C) = 3.4
 |Amy|4|2|3|
 |Mark|3|4|**3.4**|
 |Lucy|**4.6**|2|5|
+
+##      Recap exercise
+
+Compute the predicted rating for item `B` for Tom using the Item-item One Slope technique, given the following fataset and the (partially precompiled) deviations matrix
+
+| Customer | Item A | Item B | Item C |
+|:---------|:------:|:------:|:------:|
+| Bill | 4 | 3 | - |
+| Wendy | 1 | 2 | 2 |
+| Tom | 3 | - | 3 |
+| Sara | - | 2 | 5 |
+
+| Deviations | Item A | Item B | Item C |
+|:-----------|:------:|:------:|:------:|
+| Item A | 0 | ? | -0.5 <sub>(2)</sub> |
+| Item B | ? | ? | ? |
+| Item C | 0.5 <sub>(2)</sub> | ? | 0 |
+
+Deviations
+```
+dev(A,B) = (4-3) + (1-2) / 2 = 0
+dev(B,C) = (2-2) + (2-5) / 2 = -1.5
+```
+
+| Deviations | Item A | Item B | Item C |
+|:-----------|:------:|:------:|:------:|
+| Item A | 0 | 0 | -0.5 <sub>(2)</sub> |
+| Item B | 0 | 0 | -1.5 <sub>(2)</sub> |
+| Item C | 0.5 <sub>(2)</sub> | 1.5 <sub>(2)</sub> | 0 |
+
+```
+p(Tom,B) = (3-0) * 2 + (3-1.5) * 2 / 4
+p(Tom,B) = 9 / 4
+p(Tom,B) = 2.25
+```
+
+#       Lecture 4
+-   Item-item ACS (Adjusted Cosine Similarity)
+    -   Step 1: compute similarities between all pairs of items
+    -   Step 2: use the known ratings of the target user and their similarities with the "target item" to predict the rating for the target item
+
+##  Item-Item ACS Step 1
+> Similarity between items => **COLUMNS**
+    -   Consider only rows with values in both columns
+
+|   | Users | -  | Phoenix | -  | Passion Pit | -  | n  |
+|:--|:------|:---|:-------:|:--:|:-----------:|:--:|:--:|
+|1  | Tamara Young |  | 5 | | | | |
+|2  | Jasmine Abbey | | | | 4 | | 
+|u | Cecillia de la Cueva | | **1**| | **2** | | |
+|m-1| Jessica Nguyen | | **5**| | **5** | | |
+|m | Jordyn Zamora | | **4**| | **5** | | |
+
+![Imgur](https://i.imgur.com/AvvyMSL.png)
+
+- acs(i,j) = similarity between items i and j
+- Ru,i = rating of user u for item i
+- Ru,i - Ru(with line above) = rating of user u for item i, **adjusted**
+
+-   Numerator
+    -   For every user **(who rated both items)** *multiply* the adjusted rating of those two items and sum the results
+-   Denominator
+    -   Sum the squares of all the adjusted ratings for item i and take the square root of that result for only the users which rated both items
+    -   repeat for j
+    -   multiply those two
+
+###     Example 1
+
+| Users | Average rating | Kacey Musgraves | Imagine Dragons |
+|:------|:--------------:|:----:|:---------------:|
+|David|3.25| | 3 |
+|Matt | 3.0 | | 3 |
+| Ben | 2.75 | **4** | **3** |
+| Chris | 3.2 | **4** | **4**|
+|Tori|4.25|**5**|**4**|
+
+```
+s(Musgraves,Dragons) = ((4-2.75) * (3-2.75) // Ben's ratings) + ((4-3.2) * (4-3.2) // Chris' ratings) + ((5-4.25) * (4-4.25) // Tori's ratings) / sqrt((4-2.75)^2 + (4-3.2)^2 + (5-4.25)^2) * sqrt((3-2.75)^2 + (4-3.2)^2 + (4-4.25)^2)
+s(Musgraves,Dragons) = 0.7650 / sqrt(2.765) * sqrt(1.265)
+s(Musgraves,Dragons) = 0.7650 / 1.4544
+s(Musgraves,Dragons) = 0.5260
+```
+
+###     Example 2
+Compute ACS between A and B, and between B and C
+- Start by computing the average rating for each user
+
+|User|A|B|C|
+|:--|:--:|:--:|:--:|
+|Amy|3.5|3.0|4.0|
+|Bill|2.0|5.0|2.0|
+|Clara|3.0|/|5.0|
+
+Averages
+```
+Amy = 3.5 + 3.0 + 4.0 / 3 = 3.5
+Bill = 2.0 + 5.0 + 2.0 / 3 = 3.0
+Clara = 3.0 + 5.0 / 2 = 4.0
+```
+
+Similarity between A and B
+-   Two users involved: Amy and Bill
+
+```
+acs(A,B)=(3.5-3.5)(3.0-3.5) + (2.0-3.0)(5.0-3.0) / sqrt((3.5-3.5)^2 + (2.0-3.0)^2) * sqrt((3.0-3.5)^2+(5.0-3.0)^2)
+acs(A,B)= 0 - 2 / sqrt(0 + 1) * sqrt(0.25 + 4)
+acs(A,B)= -2 / sqrt(4.25)
+acs(A,B)= -0.97
+```
+Similarity between B and C
+- Two users involved: Amy and Bill
+
+```
+acs(B,C)=(3.0-3.5)(4.0-3.5) + (5.0 - 3.0)(2.0 - 3.0) / sqrt((3.0-3.5)^2 + (5.0-3.0)^2) * sqrt((4.0-3.5)^2 + (2.0-3.0)^2)
+acs(B,C)= -0.25 + -2 / sqrt(0.25 + 4) * sqrt(0.25 + 1)
+acs(B,C)= -2.25 / sqrt(4.25) * sqrt(1.25)
+acs(B,C)= -2.25 / 2.30488
+acs(B,C)= -0.97
+```
+>Watch out for the minus symbols at the end, make sure to put the entire denominator in () brackets to ensure proper calulation
+
+##      Item-item ACS, step 2
+![Imgur](https://i.imgur.com/4DswAXV.png)
+
+-   p(u,i) = predicted rating for user u of item i
+-   j = all items for which there is a similarity value with i and which user u rated 
+    -   S<sub>i,j</sub> = acs(i,j) => similarity between items i and j
+    - R<sub>u,j</sub> = rating that user u gave to item j
+
+Pseudocode
+```
+predictedRating(u, i) =>
+numerator = 0 //teller
+denominator = 0 //noemer
+foreach item j that user u already rated
+numerator += (similarity between i and j) * (rating of u for j)
+denominator += absolute value of similarity between i and j
+numerator/denominator
+```
+
+>Important
+-   For the formula to work best R<sub>u,j</sub> should be between -1 to 1
+-   => **normalization** needed
+
+-   Normalization formula
+    -   r' = 2 * ((r - r<sub>min</sub>) / (r<sub>max</sub> - r<sub>min</sub>)) - 1
+-   Denormalization formula
+    -   r = ((r' + 1) / 2) * (r<sub>max</sub>-r<sub>min</sub>) + r<sub>min</sub>
+
+###     Normalization example
+-   r = 2 in a scale from 1 to 5
+
+Compute the normalized rating between -1 and 1
+```
+r' = 2 * ((2-1)/(5-1)) - 1
+r' = 2 * (1/4) - 1
+r' = 0.5 - 1
+r' = -0.5
+```
+
+###     Denormalization example
+-   r' = -0.5 in a scale from -1 to 1
+
+Compute the rating in a scale from 1 to 5
+```
+r = ((-0.5 + 1) / 2) * (5-1) + 1
+r = 0.5 / 2 * 4 + 1
+r = 0.25 * 4 + 1
+r = 2
+```
+
+###     Example 1
+-   Compute the predicted rating for David for Kacey Musgraves
+
+David's Ratings
+| Artist | Rating | Normalized Rating |
+|:-------|:-:|:--:|
+|Imagine Dragons|3|0|
+|Daft Punk|5|1|
+|Lorde|4|0.5|
+|Fall Out Boy|1|-1|
+
+Similarity matrix
+|          | Fall Out Boy | Lorde | Daft Punk | Imagine Dragon |
+|:---------|:------------:|:-----:|:---------:|:--------------:|
+| Kacey Musgraves | -0.9549 | 0.3210 | 1.000 | 0.5260 |
+
+```
+p(David,Musgraves) = (.5260 * 0) + (1.00 * 1) + (.321 * 0.5) + (-.955 * -1) / 0.5260 + 1.000 + 0.321 + 0.955
+p(David,Musgraves) = 0 + 1 + 0.1605 + 0.955 / 2.802
+p(David,Musgraves) = 2.1105 / 2.802
+p(David,Musgraves) = 0.753
+```
+This still needs to be de-normalized
+```
+r = ((0.753 + 1) / 2) * (5 - 1) + 1
+r = (1.753 / 2) * 4 + 1
+r = 3.506 + 1
+r = 4.506
+```
+
+###     Example 2
+-   Exercise: predict the rating of item B for Clara
+    -   ACS(A,B) = -0.97 ACS(B,C) = -0.98
+
+|User|A|B|C|
+|:--|:--:|:--:|:--:|
+|Amy|3.5|3.0|4.0|
+|Bill|2.0|5.0|2.0|
+|Clara|3.0|/|5.0|
+
+```
+p(Clara, B) = 0 * (-0.97) + 1 * (-0.98) / 0.97 + 0.98
+p(Clara, B) = -0.98 / 1.95
+p(Clara, B) = -0.5
+```
+This still needs to be denormalized => 2
