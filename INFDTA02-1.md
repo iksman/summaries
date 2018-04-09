@@ -373,7 +373,6 @@ How do you determine the `k` nearest neighbours (which have a similarity >= than
 
 -   Target user for this example is Amy
 -   3 nearest neighbours are Bill, Clara and Robert
--   Item `i` = Spiderman 2
 
 > Each neighbour should count **PROPORTIONALLY** to their similarity to the target
 
@@ -587,7 +586,7 @@ Deviation between Taylor Swift and PSY?
 ```
 dev(TS,PSY) = (4-3) + (5-2) / 2
 dev(TS,PSY) = 1 + 3 / 2
-dev(TS,PSY) = 2
+dev(TS,PSY) = +2
 ```
 
 Deviation between PSY and Whitney Houston?
@@ -930,3 +929,208 @@ p(Clara, B) = -0.98 / 1.95
 p(Clara, B) = -0.5
 ```
 This still needs to be denormalized => 2
+
+#   Lesson 6
+
+Lesson 6
+
+1
+
+```
+d(Amy,Bill) = sqrt((3.0-2.5)^2 + (4.5-1.0)^2)
+            = sqrt((0.5)^2 + (3.5)^2)
+            = sqrt((0.5)^2 + (3.5)^2)
+            = sqrt(0.25 + 12.25)
+            = sqrt(12.5)
+s(Amy,Bill) = 1 / 1 + sqrt(12.5)
+s(Amy,Bill) = 0.22
+
+d(Amy,John) = sqrt((3.0-3.5)^2 + (4.5-5.0)^2)
+            = sqrt((-0.5)^2 + (-0.5)^2)
+            = sqrt(0.5)
+s(Amy,John) = 1 / 1 + sqrt(0.5)
+s(Amy,John) = 0.59
+
+d(Amy,Clara) = sqrt((3.0-3.5)^2 + (4.5-4.5)^2)
+             = sqrt((-0.5)^2 + 0)
+             = sqrt(0.25)
+s(Amy,Clara) = 1 / 1 + sqrt(0.25)
+             = 0.67
+```
+
+Nearest neighbours are John and Clara
+```
+r(Amy,A) = (4.5*0.59) + (3.0*0.67) / 0.59 + 0.67
+r(Amy,A) = 3.7
+```
+
+2
+
+deviation matrix
+```
+dev(A,B) = (2.0-2.5) + (4.5-3.5) + (3.0-3.5) / 3
+         = -0.5 + 1 + -0.5 / 3
+         = 0 / 3
+         = 0 (3)
+
+dev(B,C) = (3.0-4.5) + (2.5-1.0) + (3.5-5.0) + (3.5-4.0) / 4
+         = -1.5 + 1.5 + -1.5 + -.5 / 4
+         = -0.5 (4)
+
+dev(A,C) = (2.0-1.0) + (4.5-5.0) + (3.0-4.0) / 3
+         = 1 + -0.5 + -1 / 3
+         = -0.5 / 3
+         = -0.17 (3)
+```
+
+x | A    | B   | C   |
+:--|:----:|:----:|:----:|
+A | 0    | 0   |-0.17|
+B | 0    | 0   |-0.5 |
+C | 0.17 | 0.5 | 0   |
+
+```
+r(Amy,A) = (3.0 + 0) + (4.5-0.17) / 2
+         = 3.0 + 4.3 / 2
+         = 3.67
+```
+
+3
+
+[2.5, 3, 4.25, 5] of [1,5] into [0,1]
+```
+2.5 - 1 / 5 - 1 = 0.38
+3 - 1 / 5 - 1 = 0.5
+4.25 / 5 = 0.81
+4 / 4 = 1
+```
+```
+[2.5, 3, 4.25, 5] of [-3,5] into [0,1]
+2.5 - -3 / 5 - -3 = 0.69
+3 - -3 / 5 - -3 = 0.75
+4.25 - -3 / 5 - -3 = 0.91
+5 - - 3 / 5 - -3 = 1
+```
+
+4
+
+Implication expression of the form X=>Y
+Where X,Y are itemsets with an empty intersection
+
+Example is { bread, milk } => { beer }
+
+To evaluate if an association rule is good we evaluate it through the three metrics.
+
+|x|A|B|C|D|E|
+|1|1|1|1|0|0|
+|2|1|0|1|1|0|
+|3|0|1|1|1|0|
+|4|1|0|0|1|1|
+|5|0|1|1|0|1|
+
+```
+supp(A,D) = 2 / 5
+conf(A,D) = 2 / 3
+lift(A,D) = (2 / 5) / 3/5 * 3/5 = 1.11
+
+supp(C,A) = 2 / 5
+conf(C,A) = 2 / 4
+lift(C,A) = (2 / 5) / 4/5 * 3/5 = 0.83
+
+supp(BC,D) = 1 / 5
+conf(BC,D) = 1 / 3
+lift(BC,D) = (1 / 5) / 3/5 * 3/5 = 0.55
+```
+
+5
+```
+s = 1 - (7 / 12)
+s = 1 - 0.58
+s = 0.42
+```
+6
+
+Average ratings
+Amy     6
+Bill    3
+Clara   5
+Dirk    6
+Emma    7
+
+Normalized ratings of Amy
+```
+I3      2 * (4-1) / (10-1) - 1 = -0.33
+I4      2 * (8-1) / (10-1) - 1 = 0.55
+
+//  Calculated using Clara and Dirk
+acs(I1,I3) = (3-5 * 7-5) + (4-6 * 5-6) / sqrt((3-5)^2 + (4-6)^2) * sqrt((7-5)^2 + (5-6)^2)
+           = -0.32
+
+//  Calculated using Bill and Clara
+acs(I1,I4) = (2-3 * 6-3) + (3-5 * 5-5) / sqrt((2-3)^2 + (3-5)^2) * sqrt((6-3)^2 + (5-5)^2)
+           = -0.45
+
+p(Amy,I1) = (-0.32 * -1/3) + (-0.45 * 5 / 9) / 0.32 + 0.45
+          = 0.1067 - 0.25 / 0.77
+          = -0.14
+
+r(Amy,I1) = ((-0.14 + 1) / 2) * (10-1) + 1
+          = 0.86 / 2 * 9 + 1
+          = 4.87
+```
+
+#       Lesson 7
+
+1
+
+Manhattan
+```
+d(1,2) = (3-2) + (2.5-4) + (1-3.5)
+       = 1 + 1.5 + 2.5
+       = 5
+
+s(1,2) = 1 / 1 + 5
+       = 1/6
+```
+
+Euclidian
+```
+d(1,2) = sqrt((3-2)^2 + (2.5-4)^2 + (1-3.5)^2)
+       = sqrt(1 + 2.25 + 6.25)
+       = sqrt(9.5)
+
+s(1,2) = 1 / 1 + sqrt(9.5)
+       = 0.25
+```
+
+2
+
+s = 1 - (300 / 100 * 200)
+s = 1 - 0.015
+s = 0.985
+
+Dataset is very sparse, 98.5% is not filled in
+
+3
+```
+s(Rick) = 1 / 1 + 1.4 = 0.42
+s(Stan) = 1 / 1 + 1.4 = 0.42
+s(Lisa) = 1 / 1 + 3.6 = 0.21
+```
+
+Nearest neighbours are Rick and Stan
+```
+r(Anne,Y) = 4 * 0.42 + 5 * 0.42 / 0.42 + 0.42 = 4.5
+```
+
+4
+```
+acs(I2,I3) = (5-5)*(7-5) + (9-6)*(5-6) + (6-7)*(8-7) / sqrt((5-5)^2 + (9-6)^2  + (6-7)^2) * sqrt((7-5)^2 + (5-6)^2 + (8-7)^2)
+           = -0.52
+
+acs(I2,I4) = -1
+
+p(Amy,I2) = ((-0.52 * -1/3) + (-1 * 5/9)) / (0.52 + 1) = -0.26
+r(Amy,I2) = -0.26 + 1 / 2 * 10-1 + 1 = 4.33
+```
+
