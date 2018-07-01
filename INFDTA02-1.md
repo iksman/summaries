@@ -501,9 +501,9 @@ Compute the predicted rating for Jim for item C, considering his 3 nearest neigh
 Euclidian similarities
 ```
 d(Tom,Jim) = (1.5 - 2)^2 + (4.5 - 5)^2
-d(Tom,Jim) = 0.5
-s(Tom,Jim) = 1 / 1 + 0.5
-s(Tom,Jim) = 0.67
+d(Tom,Jim) = sqrt(0.5)
+s(Tom,Jim) = 1 / 1 + sqrt(0.5)
+s(Tom,Jim) = 0.59
 
 s(Bill,Jim) = 1 / 1 + sqrt(18)
 s(Bill,Jim) = 0.19
@@ -512,11 +512,11 @@ s(Amy,Jim) = 1 / 1 + sqrt(3)
 s(Amy,Jim) = 0.37
 
 d(Sara,Jim) = (3 - 2)^2 + (4 - 5)^2
-d(Sara,Jim) = 2
-s(Sara,Jim) = 1 / 1 + 2
-s(Sara,Jim) = 0.33
+d(Sara,Jim) = sqrt(2)
+s(Sara,Jim) = 1 / 1 + sqrt(2)
+s(Sara,Jim) = 0.41
 ```
-The nearest neighbours to Jim are Tom and Amy, the others did not meet the threshold.
+The nearest neighbours to Jim are Tom, Sara and Amy
 
 #      Lecture 3
 -   User-item
